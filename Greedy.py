@@ -86,7 +86,7 @@ def deal_with_greedy_epsilon(problem: dict, iteration: int) -> [np.ndarray, list
     history_iteration = [0]
 
     for i in range(iteration):
-        temp, temp_dis = deal_once(problem, 0.02)
+        temp, temp_dis = deal_once(problem, 0.1)
         if temp_dis < best_dis:
             best_, best_dis = temp, temp_dis
             history.append(best_dis)
@@ -97,14 +97,19 @@ def deal_with_greedy_epsilon(problem: dict, iteration: int) -> [np.ndarray, list
     return best_, history, history_iteration
 
 
-iteration = 1000000
+
+iteration = 100000
 
 problem = MyTSP.get_problem()
 result, history, history_iteration = deal_with_greedy_epsilon(problem, iteration)
-plt.subplot(121)
+# plt.subplot(121)
+plt.figure('a')
 # plt.plot([i for i in range(len(history))], history)
 plt.plot(history_iteration, history)
-plt.subplot(122)
+plt.show()
+# plt.subplot(122)
+plt.figure('b')
 MyTSP.cal_draw(result, problem)
 print(result)
+print(0.1)
 

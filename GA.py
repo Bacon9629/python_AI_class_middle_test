@@ -4,9 +4,8 @@ from matplotlib import pyplot as plt
 
 
 class MGA:
-    def __init__(self, population_size, cross_rate, mutation_rate, problem: dict):
+    def __init__(self, population_size, slice_amount, mutation_rate, problem: dict):
         """
-        dna_size : 一個人有幾個DNA
         population_size : 一個世代有幾個人
         cross_rate : 繁殖時每項DNA的交換機率
         mutation_rate : 每項DNA的變異機率
@@ -22,7 +21,7 @@ class MGA:
         self.population = np.array([self.dna_database, a, b, c] + [c for i in range(population_size - 4)])
 
         self.population_size = population_size
-        self.cross_rate = cross_rate
+        self.slice_amount = slice_amount
         self.mutation_rate = mutation_rate
 
         self.cross_over_count = 0
@@ -38,6 +37,9 @@ class MGA:
         """
         依適應分數做配種，留下好的種，把爛的種改掉
         """
+
+        self.population[fitness < 0] = self.dna_database
+
         self.cross_over_count += 1
         # 找出fitness最好的兩個值
         max_value = fitness.max()
@@ -50,7 +52,7 @@ class MGA:
         self.population[-1] = self.population[first_index]
         self.population[-2] = self.population[second_index]
 
-        gape = 8
+        gape = self.slice_amount
         # gape_amount = math.ceil(len(self.dna_database) / gape)
         dna_size = len(self.dna_database)
 
@@ -58,24 +60,25 @@ class MGA:
         分成兩種交換，一種是把second的片段直接移到first的相同位置上；一種是把second的片段隨機移到first的隨機位置上
         """
         # for i in range(int(self.population_size)-1):
-        for i in range(int(self.population_size / 2) - 1):
-            rand_idx_first_0 = np.random.randint(0, dna_size - gape)
-            rand_idx_first_1 = np.random.randint(0, dna_size - gape)
-
-            temp_first = self.population[first_index].copy()
-            temp_second = self.population[second_index].copy()
-
-            temp_first[rand_idx_first_0:rand_idx_first_0 + gape] = temp_second[rand_idx_first_0:rand_idx_first_0 + gape]
-            temp_first[rand_idx_first_1:rand_idx_first_1 + gape] = temp_second[rand_idx_first_1:rand_idx_first_1 + gape]
-
-            temp_first = self.remove_repeat_value(temp_first)
-
-            # print(temp_first, i)
-            self.population[i] = temp_first
-            # print(self.population[i])
+        # for i in range(int(self.population_size / 2) - 1):
+        #     rand_idx_first_0 = np.random.randint(0, dna_size - gape)
+        #     rand_idx_first_1 = np.random.randint(0, dna_size - gape)
+        #
+        #     temp_first = self.population[first_index].copy()
+        #     temp_second = self.population[second_index].copy()
+        #
+        #     temp_first[rand_idx_first_0:rand_idx_first_0 + gape] = temp_second[rand_idx_first_0:rand_idx_first_0 + gape]
+        #     temp_first[rand_idx_first_1:rand_idx_first_1 + gape] = temp_second[rand_idx_first_1:rand_idx_first_1 + gape]
+        #
+        #     temp_first = self.remove_repeat_value(temp_first)
+        #
+        #     # print(temp_first, i)
+        #     self.population[i] = temp_first
+        #     # print(self.population[i])
 
         # print()
-        for i in range(int(self.population_size / 2) - 1, self.population_size - 2):
+        # for i in range(int(self.population_size / 2) - 1, self.population_size - 2):
+        for i in range(self.population_size - 2):
             rand_idx_first_0 = np.random.randint(0, dna_size - gape)
             rand_idx_first_1 = np.random.randint(0, dna_size - gape)
             rand_idx_second_0 = np.random.randint(0, dna_size - gape)
@@ -98,6 +101,11 @@ class MGA:
         # 找出fitness最好的兩個值
         if np.array_equal(self.population[-1], self.population[-2]):
             self.mutation(-2)
+
+
+        # if fitness[-1] < 0:
+        #     print(test_name)
+        #     raise ValueError
 
         # print()
 
@@ -168,15 +176,22 @@ class MGA:
         return fitness[best_index], self.population[best_index], history_y
 
 
-a = MGA(60, 0.1, 0.03, MyTSP.get_problem())
+test_name = "iteration = 100K, population = 10, dna_slice_amount = 16"
+
+print(test_name)
+
+a = MGA(10, 16, 0.03, MyTSP.get_problem())
 score, policy, history_y = a.evolve(100000)
 
 print(score, policy)
 
 plt.figure('a')
+plt.title(test_name)
 # plt.subplot(211)
 plt.plot(history_y)
 plt.show()
 # plt.subplot(212)
 plt.figure('b')
+plt.title(test_name)
 MyTSP.cal_draw(policy, MyTSP.get_problem())
+print(test_name)
